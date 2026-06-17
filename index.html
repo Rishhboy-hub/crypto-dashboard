@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMC Institutional Terminal</title>
+    <title>SMC Pro Trading Terminal</title>
     <style>
         body {
             background-color: #06090e;
@@ -92,30 +92,22 @@
                     "interval": "15",
                     "timezone": "Etc/UTC",
                     "theme": "dark",
-                    "style": "1", /* Candlesticks */
+                    "style": "1",
                     "locale": "en",
                     "enable_publishing": false,
                     "hide_top_toolbar": false,
-                    "hide_legend": true,
+                    "hide_legend": false,
                     "save_image": false,
                     "container_id": "advanced_order_flow",
-                    /* Dark Mode Custom Overrides to match Pro look */
                     "loading_screen": { "backgroundColor": "#06090e" },
                     "overrides": {
                         "paneProperties.background": "#0b0e14",
                         "paneProperties.vertGridProperties.color": "#151a22",
-                        "paneProperties.horzGridProperties.color": "#151a22",
-                        "mainSeriesProperties.candleStyle.upColor": "#00c853",
-                        "mainSeriesProperties.candleStyle.downColor": "#ff3b30",
-                        "mainSeriesProperties.candleStyle.drawWick": true,
-                        "mainSeriesProperties.candleStyle.wickUpColor": "#00c853",
-                        "mainSeriesProperties.candleStyle.wickDownColor": "#ff3b30",
-                        "mainSeriesProperties.candleStyle.borderUpColor": "#00c853",
-                        "mainSeriesProperties.candleStyle.borderDownColor": "#ff3b30"
+                        "paneProperties.horzGridProperties.color": "#151a22"
                     },
                     "studies": [
-                        "STD;Smart_Money_Concepts", /* Smart Money Lines (BOS/CHoCH) */
-                        "STD;Volume_Profile_Visible_Range" /* Right side Volume Bars */
+                        "STD;Smart_Money_Concepts", /* SMC (BOS, CHoCH, OB) */
+                        "STD;Volume_Profile_Visible_Range" /* Right side Volume Profile */
                     ]
                 });
                 </script>
