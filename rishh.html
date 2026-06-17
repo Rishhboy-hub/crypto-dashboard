@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Dashboard</title>
+    <!-- Load TradingView Lightweight Charts Library -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body {
+            background-color: #131722;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            height: 90vh;
+        }
+        #chart-container {
+            flex: 2;
+            background: #1c2030;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .order-book {
+            flex: 1;
+            max-width: 350px;
+            background: #1c2030;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        h2 { text-align: center; margin-top: 0; color: #f0b90b; font-size: 20px; }
+        .section { margin-bottom: 15px; }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+        .ask { color: #ff4a4a; } /* Sellers */
+        .bid { color: #00c853; } /* Buyers */
+        .header { font-weight: bold; color: #848e9c; border-bottom: 1px solid #2b3139; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- CHART CONTAINER -->
+    <div id="chart-container">
+        <h2 style="text-align: left; margin-left: 10px;">BTC/USDT Live Chart</h2>
+    </div>
+
+    <!-- ORDER BOOK CONTAINER -->
+    <div class="order-book">
+        <h2>Live Orders</h2>
+        
+        <!-- SELL ORDERS (ASKS) -->
+        <div class="section">
+            <div class="row header"><span>Price (USDT)</span> <span>Amount (BTC)</span></div>
+            <div id="asks-list">Loading Sellers...</div>
+        </div>
+
+        <!-- BUY ORDERS (BIDS) -->
+        <div class="section">
+            <div class="row header"><span>Price (USDT)</span> <span>Amount (BTC)</span></div>
+            <div id="bids-list">Loading Buyers...</div>
+        </div>
+    </div>
+
+<script>
+    // --- 1. INITIALIZE TRADINGVIEW CHART ---
+    const chartContainer = document.getElementById('chart-container');
+    const chart = LightweightCharts.createChart(chartContainer, {
+        layout: { backgroundColor: '#1c2030', textColor: '#d1d4dc' },
+        grid: { vertLines: { color: '#2b3139' }, horzLines: { color: '#2b3139' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        priceScale: { borderColor: '#485c7b' },
+        timeScale: { borderColor: '#485c7b', timeVisible: true, secondsVisible: false }
+    });
+
+    // Add Candlestick Series
+    const candleSeries = chart.addCandlestickSeries({
+        upColor: '#00c853', downColor: '#ff4a4a', borderDownColor: '#ff4a4a',
+        borderUpColor: '#00c853', wickDownColor: '#ff4a4a', wickUpColor: '#00c853'
+    });
+
+    // --- 2. BINANCE WEBSOCKETS CONNECTIVITY ---
+    
+    // WebSocket connection for Live Candlesticks (1 Minute interval)
+    const candleWs = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_1m");
+    candleWs.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        const candle = message.k;
+        
+        // Update Chart with Live Stream Data
+        candleSeries.update({
+            time: candle.t / 1000, // Convert millisecond timestamp to seconds
+            open: parseFloat(candle.o),
+            high: parseFloat(candle.h),
+            low: parseFloat(candle.l),
+            close: parseFloat(candle.c)
+        });
+    };
+
+    // WebSocket connection for Live Order Book Depth
+    const depthWs = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@depth10@100ms");
+    const asksList = document.getElementById('asks-list');
+    const bidsList = document.getElementById('bids-list');
+
+    depthWs.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        // Populate Sellers Data (Asks) - Top 8 Entries
+        let asksHTML = "";
+        data.asks.slice(0, 8).reverse().forEach(ask => {
+            asksHTML += `<div class="row ask"><span>${parseFloat(ask[0]).toFixed(2)}</span> <span>${parseFloat(ask[1]).toFixed(4)}</span></div>`;
+        });
+        asksList.innerHTML = asksHTML;
+
+        // Populate Buyers Data (Bids) - Top 8 Entries
+        let bidsHTML = "";
+        data.bids.slice(0, 8).forEach(bid => {
+            bidsHTML += `<div class="row bid"><span>${parseFloat(bid[0]).toFixed(2)}</span> <span>${parseFloat(bid[1]).toFixed(4)}</span></div>`;
+        });
+        bidsList.innerHTML = bidsHTML;
+    };
+
+    // Ensure chart responsiveness on window resize
+    window.onresize = () => {
+        chart.resize(chartContainer.clientWidth, chartContainer.clientHeight - 40);
+    };
+    chart.resize(chartContainer.clientWidth, chartContainer.clientHeight - 40);
+</script>
+
+</body>
+</html>
