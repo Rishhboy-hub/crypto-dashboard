@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC Pro Trading Terminal</title>
+    <style>
+        body {
+            background-color: #0b0e11;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            height: 96vh;
+            overflow: hidden;
+        }
+        #terminal-wrapper {
+            display: flex;
+            gap: 10px;
+            height: 100%;
+            width: 100%;
+        }
+        #chart-main {
+            flex: 3;
+            background: #141823;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2a2e39;
+        }
+        #side-analysis {
+            flex: 1;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 100%;
+        }
+        .panel-box {
+            flex: 1;
+            background: #141823;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2a2e39;
+        }
+    </style>
+</head>
+<body>
 
+    <div id="terminal-wrapper">
+        
+        <div id="chart-main">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div id="tradingview_pro_smc" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                <script type="text/javascript">
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "BINANCE:BTCUSDT",
+                    "interval": "15", /* 15 Min is perfect for SMC & Order Blocks */
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1", /* Candlesticks */
+                    "locale": "en",
+                    "toolbar_bg": "#141823",
+                    "enable_publishing": false,
+                    "withdate": true,
+                    "hide_side_toolbar": false, /* Shows Drawing tools on the left */
+                    "allow_symbol_change": true,
+                    "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT"],
+                    "details": true,
+                    "studies": [
+                        "STD;Smart_Money_Concepts", /* Auto Load SMC lines */
+                        "STD;Volume_Profile_Visible_Range" /* Auto Load the Volume bars on the right side like your photo */
+                    ],
+                    "container_id": "tradingview_pro_smc"
+                });
+                </script>
+            </div>
+        </div>
+
+        <div id="side-analysis">
+            <div class="panel-box">
+                <div class="tradingview-widget-container" style="height:100%;width:100%">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                    {
+                        "interval": "15m",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "BINANCE:BTCUSDT",
+                        "showHeading": false,
+                        "locale": "en",
+                        "theme": "dark"
+                    }
+                    </script>
+                </div>
+            </div>
+            
+            <div class="panel-box">
+                <div class="tradingview-widget-container" style="height:100%;width:100%">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+                    {
+                        "feedMode": "allSymbols",
+                        "isTransparent": true,
+                        "displayMode": "regular",
+                        "width": "100%",
+                        "height": "100%",
+                        "colorTheme": "dark",
+                        "locale": "en"
+                    }
+                    </script>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
