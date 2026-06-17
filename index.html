@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Trading Dashboard</title>
-    <!-- Load TradingView Lightweight Charts Library -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         body {
             background-color: #131722;
@@ -14,14 +12,21 @@
             margin: 0;
             padding: 20px;
             display: flex;
+            flex-direction: column;
             gap: 20px;
-            height: 90vh;
+            height: 95vh;
+        }
+        #dashboard-container {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            height: 100%;
         }
         #chart-container {
             flex: 2;
             background: #1c2030;
             border-radius: 8px;
-            padding: 10px;
+            overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .order-book {
@@ -33,7 +38,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            overflow-y: auto;
         }
         h2 { text-align: center; margin-top: 0; color: #f0b90b; font-size: 20px; }
         .section { margin-bottom: 15px; }
@@ -50,91 +55,70 @@
 </head>
 <body>
 
-    <!-- CHART CONTAINER -->
-    <div id="chart-container">
-        <h2 style="text-align: left; margin-left: 10px;">BTC/USDT Live Chart</h2>
-    </div>
+    <h1 style="margin: 0; font-size: 24px; color: #f0b90b; text-align: center;">Live Crypto Dashboard</h1>
 
-    <!-- ORDER BOOK CONTAINER -->
-    <div class="order-book">
-        <h2>Live Orders</h2>
-        
-        <!-- SELL ORDERS (ASKS) -->
-        <div class="section">
-            <div class="row header"><span>Price (USDT)</span> <span>Amount (BTC)</span></div>
-            <div id="asks-list">Loading Sellers...</div>
+    <div id="dashboard-container">
+        <div id="chart-container">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div id="tradingview_chart" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                <script type="text/javascript">
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "BINANCE:BTCUSDT",
+                    "interval": "1",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_chart"
+                });
+                </script>
+            </div>
         </div>
 
-        <!-- BUY ORDERS (BIDS) -->
-        <div class="section">
-            <div class="row header"><span>Price (USDT)</span> <span>Amount (BTC)</span></div>
-            <div id="bids-list">Loading Buyers...</div>
+        <div class="order-book">
+            <h2>Live Order Book (Binance)</h2>
+            <div class="section">
+                <div class="row header"><span>Price (USDT)</span> <span>Amount (BTC)</span></div>
+                <div id="asks-list">Connecting to live stream...</div>
+            </div>
+            <div class="section">
+                <div class="row header"><span>Price (USDT)</span> <span>Amount (BTC)</span></div>
+                <div id="bids-list">Connecting to live stream...</div>
+            </div>
         </div>
     </div>
 
 <script>
-    // --- 1. INITIALIZE TRADINGVIEW CHART ---
-    const chartContainer = document.getElementById('chart-container');
-    const chart = LightweightCharts.createChart(chartContainer, {
-        layout: { backgroundColor: '#1c2030', textColor: '#d1d4dc' },
-        grid: { vertLines: { color: '#2b3139' }, horzLines: { color: '#2b3139' } },
-        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-        priceScale: { borderColor: '#485c7b' },
-        timeScale: { borderColor: '#485c7b', timeVisible: true, secondsVisible: false }
-    });
-
-    // Add Candlestick Series
-    const candleSeries = chart.addCandlestickSeries({
-        upColor: '#00c853', downColor: '#ff4a4a', borderDownColor: '#ff4a4a',
-        borderUpColor: '#00c853', wickDownColor: '#ff4a4a', wickUpColor: '#00c853'
-    });
-
-    // --- 2. BINANCE WEBSOCKETS CONNECTIVITY ---
-    
-    // WebSocket connection for Live Candlesticks (1 Minute interval)
-    const candleWs = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@kline_1m");
-    candleWs.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        const candle = message.k;
-        
-        // Update Chart with Live Stream Data
-        candleSeries.update({
-            time: candle.t / 1000, // Convert millisecond timestamp to seconds
-            open: parseFloat(candle.o),
-            high: parseFloat(candle.h),
-            low: parseFloat(candle.l),
-            close: parseFloat(candle.c)
-        });
-    };
-
-    // WebSocket connection for Live Order Book Depth
-    const depthWs = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@depth10@100ms");
+    // Live Order Book Stream using standard fallback secure stream
+    const depthWs = new WebSocket("wss://stream.binance.com:443/ws/btcusdt@depth10@100ms");
     const asksList = document.getElementById('asks-list');
     const bidsList = document.getElementById('bids-list');
 
     depthWs.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
-        // Populate Sellers Data (Asks) - Top 8 Entries
         let asksHTML = "";
-        data.asks.slice(0, 8).reverse().forEach(ask => {
+        data.asks.slice(0, 10).reverse().forEach(ask => {
             asksHTML += `<div class="row ask"><span>${parseFloat(ask[0]).toFixed(2)}</span> <span>${parseFloat(ask[1]).toFixed(4)}</span></div>`;
         });
         asksList.innerHTML = asksHTML;
 
-        // Populate Buyers Data (Bids) - Top 8 Entries
         let bidsHTML = "";
-        data.bids.slice(0, 8).forEach(bid => {
+        data.bids.slice(0, 10).forEach(bid => {
             bidsHTML += `<div class="row bid"><span>${parseFloat(bid[0]).toFixed(2)}</span> <span>${parseFloat(bid[1]).toFixed(4)}</span></div>`;
         });
         bidsList.innerHTML = bidsHTML;
     };
 
-    // Ensure chart responsiveness on window resize
-    window.onresize = () => {
-        chart.resize(chartContainer.clientWidth, chartContainer.clientHeight - 40);
+    depthWs.onerror = (err) => {
+        asksList.innerHTML = "<span style='color:orange'>Connection blocked by ISP. Please try using a VPN to see live orders.</span>";
+        bidsList.innerHTML = "<span style='color:orange'>Connection blocked by ISP. Please try using a VPN to see live orders.</span>";
     };
-    chart.resize(chartContainer.clientWidth, chartContainer.clientHeight - 40);
 </script>
 
 </body>
