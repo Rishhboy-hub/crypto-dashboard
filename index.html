@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC Institutional Terminal</title>
+    <style>
+        body {
+            background-color: #06090e;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 12px;
+            height: 96vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0b0e14;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #1e2530;
+        }
+        h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #f0b90b;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .status-tag {
+            background: rgba(0, 200, 83, 0.1);
+            color: #00c853;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid rgba(0, 200, 83, 0.3);
+        }
+        #workspace {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            height: 100%;
+        }
+        #main-chart-frame {
+            flex: 3;
+            background: #0b0e14;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1e2530;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+        }
+        #flow-panel {
+            flex: 1;
+            max-width: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .panel-card {
+            flex: 1;
+            background: #0b0e14;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1e2530;
+        }
+    </style>
+</head>
+<body>
 
+    <header>
+        <h1>Institutional Order Flow & SMC Terminal</h1>
+        <div class="status-tag">● ENGINE ACTIVE</div>
+    </header>
+
+    <div id="workspace">
+        
+        <div id="main-chart-frame">
+            <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div id="advanced_order_flow" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                <script type="text/javascript">
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": "BINANCE:BTCUSDT",
+                    "interval": "15",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1", /* Candlesticks */
+                    "locale": "en",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": true,
+                    "save_image": false,
+                    "container_id": "advanced_order_flow",
+                    /* Dark Mode Custom Overrides to match Pro look */
+                    "loading_screen": { "backgroundColor": "#06090e" },
+                    "overrides": {
+                        "paneProperties.background": "#0b0e14",
+                        "paneProperties.vertGridProperties.color": "#151a22",
+                        "paneProperties.horzGridProperties.color": "#151a22",
+                        "mainSeriesProperties.candleStyle.upColor": "#00c853",
+                        "mainSeriesProperties.candleStyle.downColor": "#ff3b30",
+                        "mainSeriesProperties.candleStyle.drawWick": true,
+                        "mainSeriesProperties.candleStyle.wickUpColor": "#00c853",
+                        "mainSeriesProperties.candleStyle.wickDownColor": "#ff3b30",
+                        "mainSeriesProperties.candleStyle.borderUpColor": "#00c853",
+                        "mainSeriesProperties.candleStyle.borderDownColor": "#ff3b30"
+                    },
+                    "studies": [
+                        "STD;Smart_Money_Concepts", /* Smart Money Lines (BOS/CHoCH) */
+                        "STD;Volume_Profile_Visible_Range" /* Right side Volume Bars */
+                    ]
+                });
+                </script>
+            </div>
+        </div>
+
+        <div id="flow-panel">
+            <div class="panel-card">
+                <div class="tradingview-widget-container" style="height:100%;width:100%">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+                    {
+                        "interval": "15m",
+                        "width": "100%",
+                        "isTransparent": true,
+                        "height": "100%",
+                        "symbol": "BINANCE:BTCUSDT",
+                        "showHeading": true,
+                        "headingText": "Trend Summary",
+                        "locale": "en",
+                        "theme": "dark"
+                    }
+                    </script>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="tradingview-widget-container" style="height:100%;width:100%">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+                    {
+                        "feedMode": "allSymbols",
+                        "isTransparent": true,
+                        "displayMode": "regular",
+                        "width": "100%",
+                        "height": "100%",
+                        "colorTheme": "dark",
+                        "locale": "en"
+                    }
+                    </script>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
